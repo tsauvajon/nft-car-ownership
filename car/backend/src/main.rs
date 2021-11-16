@@ -31,6 +31,7 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for CarWs {
 }
 
 async fn index(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, Error> {
+    println!("client trying to connect");
     let resp = ws::start(CarWs {}, &req, stream);
     println!("{:?}", resp);
     resp
@@ -51,7 +52,7 @@ async fn main() -> std::io::Result<()> {
             web::scope("/api")
                 .route("/open", web::post().to(open))
                 .route("/close", web::post().to(close))
-                .route("/ws/", web::get().to(index)),
+                .route("/ws", web::get().to(index)),
         )
     })
     .bind("127.0.0.1:8081")?
