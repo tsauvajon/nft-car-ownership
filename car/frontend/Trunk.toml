@@ -1,3 +1,12 @@
 [build]
 target = "index.html"
 dist = "dist"
+
+[serve]
+port = 8082
+
+[[proxy]]
+# This WebSocket proxy example has a backend and ws field. This example will listen for
+# WebSocket connections at `/api/ws` and proxy them to `ws://localhost:8081/api/ws`.
+backend = "ws://localhost:8081/api/ws"
+ws = true
