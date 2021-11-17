@@ -14,6 +14,7 @@ impl Handler<Connect> for Pool {
     type Result = ();
 
     fn handle(&mut self, msg: Connect, _: &mut Context<Self>) -> Self::Result {
+        println!("client joined");
         self.sessions.push(msg.addr);
     }
 }
@@ -66,7 +67,6 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for CarWs {
         let msg = match msg {
             Err(e) => {
                 println!("ws error: {:?}", e);
-                ctx.stop();
                 return;
             }
             Ok(msg) => msg,
@@ -77,11 +77,7 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for CarWs {
             ws::Message::Pong(_msg) => (),
             ws::Message::Text(text) => ctx.text(text),
             ws::Message::Binary(bin) => ctx.binary(bin),
-            ws::Message::Close(reason) => {
-                println!("client dropped");
-                ctx.close(reason);
-                ctx.stop();
-            }
+            ws::Message::Close(_reason) => println!("client dropped"),
             _ => {
                 println!("stopping after receiving 'other' message: {:?}", msg);
                 ctx.stop()

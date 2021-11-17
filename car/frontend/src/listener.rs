@@ -19,14 +19,10 @@ impl Component for WebSockerListener {
         spawn_local(async move {
             while let Some(m) = receiver.next().await {
                 match m {
-                    Ok(Message::Text(m)) => {
-                        ConsoleService::info(format!("string message: {:?}", m).as_ref());
-
-                        EventBus::dispatcher().send(Request::EventBusMsg(m));
-                    }
-                    Ok(Message::Bytes(m)) => {
-                        ConsoleService::info(format!("bytes message: {:?}", m).as_ref())
-                    }
+                    Ok(Message::Text(m)) => EventBus::dispatcher().send(Request::EventBusMsg(m)),
+                    Ok(Message::Bytes(m)) => ConsoleService::error(
+                        format!("unexpected binary message: {:?}", m).as_ref(),
+                    ),
                     Err(e) => ConsoleService::error(format!("ws: {:?}", e).as_ref()),
                 }
             }
