@@ -1,63 +1,49 @@
 mod car;
+mod event_bus;
+mod listener;
 
 use car::Car;
-use futures::{SinkExt, StreamExt};
-use reqwasm::websocket::{Message, WebSocket};
-use wasm_bindgen_futures::spawn_local;
+use event_bus::EventBus;
+use yew::agent::Bridged;
 use yew::prelude::*;
-use yew::services::ConsoleService;
 
 enum Msg {
     Open,
     Close,
+    NewCommand(String),
 }
 
-struct Model {
-    // `ComponentLink` is like a reference to a component.
-    // It can be used to send messages to the component
+struct App {
     link: ComponentLink<Self>,
-    // ws: WebSocket,
+    _producer: Box<dyn Bridge<EventBus>>,
+
     open: bool,
+    error: Option<String>,
 }
 
-impl Component for Model {
+impl Component for App {
     type Message = Msg;
     type Properties = ();
 
     fn create(_props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let ws = WebSocket::open("ws://127.0.0.1:8081/api/ws").unwrap();
-        let (mut sender, mut receiver) = (ws.sender, ws.receiver);
-
-        spawn_local(async move {
-            while let Some(m) = receiver.next().await {
-                match m {
-                    Ok(Message::Text(m)) => {
-                        ConsoleService::info(format!("message: {:?}", m).as_ref())
-                    }
-                    Ok(Message::Bytes(m)) => {
-                        ConsoleService::info(format!("message: {:?}", m).as_ref())
-                    }
-                    Err(e) => ConsoleService::error(format!("ws: {:?}", e).as_ref()),
-                }
-            }
-        });
-
-        spawn_local(async move {
-            sender
-                .send(Message::Text("test".to_string()))
-                .await
-                .unwrap();
-        });
-
         Self {
+            _producer: EventBus::bridge((&link).callback(Msg::NewCommand)),
             link,
-            // ws: ws,
             open: false,
+            error: None,
         }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
+            Msg::NewCommand(cmd) => {
+                match cmd.as_str() {
+                    "open the car!!" => self.open = true,
+                    "close the car!!" => self.open = false,
+                    _ => self.error = Some(format!("unknown command: {:?}", cmd)),
+                };
+                true
+            }
             Msg::Open => {
                 self.open = true;
                 true
@@ -84,11 +70,12 @@ impl Component for Model {
                     }
                 }
                 <Car open=self.open />
+                <listener::WebSockerListener />
             </div>
         }
     }
 }
 
 fn main() {
-    yew::start_app::<Model>();
+    yew::start_app::<App>();
 }
