@@ -19,6 +19,19 @@ pub async fn open(pool: Data<Addr<Pool>>) -> impl Responder {
     "Opening the car!"
 }
 
-pub async fn close() -> impl Responder {
+#[derive(Message)]
+#[rtype(result = "()")]
+pub struct CloseTheCar {}
+
+impl Handler<CloseTheCar> for Pool {
+    type Result = ();
+
+    fn handle(&mut self, _msg: CloseTheCar, _: &mut Context<Self>) {
+        self.send_message("close the car!!")
+    }
+}
+
+pub async fn close(pool: Data<Addr<Pool>>) -> impl Responder {
+    pool.try_send(CloseTheCar {}).unwrap();
     "Closing the car!"
 }

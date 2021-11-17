@@ -50,12 +50,9 @@ impl Actor for CarWs {
             })
             .into_actor(self)
             .then(|res, _, ctx| {
-                match res {
-                    Err(res) => {
-                        println!("sending Connect failed: {:?}", res);
-                        ctx.stop();
-                    }
-                    _ => (),
+                if let Err(e) = res {
+                    println!("sending Connect failed: {:?}", e);
+                    ctx.stop();
                 }
 
                 fut::ready(())
