@@ -62,13 +62,6 @@ impl Component for App {
     fn view(&self) -> Html {
         html! {
             <div>
-                {
-                    if self.open {
-                        html! {<button onclick=self.link.callback(|_| Msg::Close)>{ "Close" }</button>}
-                    } else {
-                        html! {<button onclick=self.link.callback(|_| Msg::Open)>{ "Open" }</button>}
-                    }
-                }
                 <Car open=self.open />
                 <listener::WebSockerListener />
             </div>
