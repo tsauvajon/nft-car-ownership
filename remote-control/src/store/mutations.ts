@@ -2,7 +2,7 @@ import { MutationTree } from "vuex";
 import Web3 from "web3";
 import { State } from "@vue/runtime-core";
 import { useToast } from "vue-toastification";
-import CarNFT from "@/contract/car-nft";
+import CarNFT, { NFT } from "@/contract/car-nft";
 
 const toast = useToast();
 
@@ -10,6 +10,7 @@ enum MutationTypes {
   REGISTER_WEB3_INSTANCE = "REGISTER_WEB3_INSTANCE",
   REGISTER_CONTRACT_INSTANCE = "REGISTER_CONTRACT_INSTANCE",
   SET_ACCOUNT = "SET_ACCOUNT",
+  SET_NFTS = "SET_NFTS",
   SET_ERROR = "SET_ERROR",
 }
 
@@ -20,6 +21,8 @@ type Mutations<S = State> = {
   ): void;
 
   [MutationTypes.SET_ACCOUNT](state: S, payload: { account: string }): void;
+
+  [MutationTypes.SET_NFTS](state: S, payload: { nfts: Array<NFT> }): void;
 
   [MutationTypes.SET_ERROR](state: S, error: string): void;
 };
@@ -36,6 +39,10 @@ const mutations: MutationTree<State> & Mutations = {
 
   [MutationTypes.SET_ACCOUNT](state, { account }) {
     state.account = account;
+  },
+
+  [MutationTypes.SET_NFTS](state, { nfts }) {
+    state.nfts = nfts;
   },
 
   [MutationTypes.SET_ERROR](state, error) {

@@ -10,6 +10,10 @@ interface Methods {
   tokenOfOwnerByIndex(account: string, index: number): ContractSendMethod;
 }
 
+export interface NFT {
+  id: number;
+}
+
 // Call a tx, and display an error if it fails.
 // Returns true if the call succeeds.
 /* eslint-disable  @typescript-eslint/no-explicit-any */
@@ -49,12 +53,13 @@ class CarNFT {
   async getNFTs(account: string): Promise<Array<number> | undefined> {
     const balanceTx = await this.methods().balanceOf(account);
 
-    const nftCount = await tryCall(balanceTx);
+    const nftCountStr: string = await tryCall(balanceTx);
 
-    if (nftCount === undefined) {
+    if (nftCountStr === undefined) {
       return;
     }
 
+    const nftCount = parseInt(nftCountStr);
     const ownedNFTs = await Promise.all(
       range(nftCount).map(async (index) => {
         const nftTx = await this.methods().tokenOfOwnerByIndex(account, index);

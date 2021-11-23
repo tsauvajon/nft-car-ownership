@@ -1,16 +1,16 @@
 <template>
   <img alt="Vue logo" src="./assets/logo.png" />
-  <HelloWorld msg="Welcome to Your Vue.js + TypeScript App" />
+  <AccountConnector msg="Welcome to Your Vue.js + TypeScript App" />
 </template>
 
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
-import HelloWorld from "./components/HelloWorld.vue";
+import AccountConnector from "./components/AccountConnector.vue";
 import { ActionTypes } from "@/store/actions";
 
 @Options({
   components: {
-    HelloWorld,
+    AccountConnector,
   },
 })
 export default class App extends Vue {

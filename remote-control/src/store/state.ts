@@ -1,7 +1,7 @@
 import { State } from "@vue/runtime-core";
 import { Store } from "vuex";
 import Web3 from "web3";
-import CarNFT from "@/contract/car-nft";
+import CarNFT, { NFT } from "@/contract/car-nft";
 
 declare module "@vue/runtime-core" {
   interface State {
@@ -9,6 +9,7 @@ declare module "@vue/runtime-core" {
     error: string | null;
     account: string | null;
     contract: CarNFT | null;
+    nfts: Array<NFT> | null;
   }
 
   interface ComponentCustomProperties {
@@ -21,6 +22,7 @@ const state: State = {
   error: null,
   account: null,
   contract: null,
+  nfts: null,
 };
 
 export { state };
