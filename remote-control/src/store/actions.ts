@@ -1,8 +1,9 @@
 import { State } from "@vue/runtime-core";
 import { ActionContext, ActionTree } from "vuex";
 import { useToast } from "vue-toastification";
-import { register } from "@/ethereum/register";
+import { register, getContract } from "@/ethereum/register";
 import { Mutations, MutationTypes } from "./mutations";
+import Web3 from "web3";
 
 const toast = useToast();
 const RinkebyChainId = "0x4"; // must be in hexadecimal
@@ -11,6 +12,7 @@ enum ActionTypes {
   REGISTER_WEB3 = "REGISTER_WEB3",
   REGISTER_HOOKS = "REGISTER_HOOKS",
   REGISTER_CONTRACT = "REGISTER_CONTRACT",
+  REFRESH_NFTS = "REFRESH_NFTS",
 }
 
 type AugmentedActionContext = {
@@ -26,8 +28,17 @@ interface Actions {
   }: AugmentedActionContext): Promise<void>;
 }
 
-interface Provider {
+interface EthereumProvider {
   request(params: { method: string; params: Array<unknown> }): void;
+}
+
+// Can't merge with EthereumProvider, because while it overlaps
+// with AbstractProvider (that has a request method),
+// it doesn't overlap with anything that has the 'on' method.
+// I'm not too sure where 'on' is coming from or how to merge
+// these two interfaces properly.
+interface WTF {
+  on(event: string, callback: (data: Array<string>) => void): void;
 }
 
 const actions: ActionTree<State, State> & Actions = {
@@ -58,7 +69,7 @@ const actions: ActionTree<State, State> & Actions = {
         "This application only runs on Rinkeby, please update your network on Metamask"
       );
 
-      const provider: Provider = eth.currentProvider as Provider;
+      const provider = eth.currentProvider as EthereumProvider;
       provider.request({
         method: "wallet_switchEthereumChain",
         params: [{ chainId: RinkebyChainId }],
@@ -69,12 +80,35 @@ const actions: ActionTree<State, State> & Actions = {
     dispatch(ActionTypes.REGISTER_CONTRACT);
   },
 
-  [ActionTypes.REGISTER_HOOKS]() {
-    1 + 1;
+  [ActionTypes.REGISTER_HOOKS]({ commit, dispatch, state }) {
+    // Need to cast to unknown first to satisfy TypeScript.
+    const provider = state.web3?.eth.currentProvider as unknown as WTF;
+    const reloadWindow = () => window.location.reload();
+
+    // If the network changes or the user disconnects their account, reload the app
+    provider.on("chainChanged", reloadWindow);
+    provider.on("disconnect", reloadWindow);
+
+    provider.on("accountsChanged", (accounts: Array<string>) => {
+      // Only 1 account returned by MetaMask,
+      // see https://docs.metamask.io/guide/ethereum-provider.html#events.
+      const account = accounts[0];
+      console.log("account changed:", account);
+
+      commit(MutationTypes.SET_ACCOUNT, { account });
+      dispatch(ActionTypes.REFRESH_NFTS);
+    });
   },
 
-  [ActionTypes.REGISTER_CONTRACT]() {
-    1 + 1;
+  async [ActionTypes.REGISTER_CONTRACT]({ commit, state }) {
+    try {
+      const contractInstance = await getContract(<Web3>state.web3);
+      commit(MutationTypes.REGISTER_CONTRACT_INSTANCE, { contractInstance });
+      toast.success("Connected to the smart contract");
+    } catch (e) {
+      console.error("register contract instance: ", e);
+      commit(MutationTypes.SET_ERROR, (<Error>e).message);
+    }
   },
 };
 
