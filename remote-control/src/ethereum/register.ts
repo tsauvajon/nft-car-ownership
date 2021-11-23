@@ -10,46 +10,48 @@ declare global {
     }
 }
 
-let register = () => new Promise(function (resolve, reject) {
-    // Metamask injects its web3 instance into window.ethereum
-    const ethereum = window.ethereum
-    if (typeof ethereum === 'undefined') {
-        reject(new Error('Please install Metamask'))
-        return
-    }
+function register(): Promise<any> {
+    return new Promise(function (resolve, reject) {
+        // Metamask injects its web3 instance into window.ethereum
+        const ethereum = window.ethereum;
+        if (typeof ethereum === "undefined") {
+            reject(new Error("Please install Metamask"));
+            return;
+        }
 
-    if (!ethereum.isMetaMask) {
-        reject(new Error('This app only works with Metamask, but you use another wallet'))
-        return
-    }
+        if (!ethereum.isMetaMask) {
+            reject(new Error("This app only works with Metamask, but you use another wallet"));
+            return;
+        }
 
-    const web3: Web3 = new Web3(ethereum)
-    window.web3 = web3 // set it in the window object to help with debugging
+        const web3: Web3 = new Web3(ethereum);
+        window.web3 = web3; // set it in the window object to help with debugging
 
-    resolve({ web3 })
-})
+        resolve({ web3 });
+    });
+}
 
-async function getContract(web3: Web3) {
+async function getContract(web3: Web3): Promise<Contract> {
     if (!web3) {
-        throw new Error("missing parameter web3")
+        throw new Error("missing parameter web3");
     }
 
     // The contract needs to be deployed to the network we're logged in!
-    const network = web3.eth.net
-    const networkID = await network.getId()
+    const network = web3.eth.net;
+    const networkID = await network.getId();
 
-    let address: string
+    let address: string;
     try {
-        address = CarNFTContractMetadata.networks[networkID].address
+        address = CarNFTContractMetadata.networks[networkID].address;
     } catch (e) {
-        console.error(e)
-        throw new Error("The contract is not deployed!")
+        console.error(e);
+        throw new Error("The contract is not deployed!");
     }
 
-    const carNFT = new web3.eth.Contract(CarNFTContractMetadata.abi, address)
-    window.carNFT = carNFT
+    const carNFT = new web3.eth.Contract(CarNFTContractMetadata.abi, address);
+    window.carNFT = carNFT;
 
-    return carNFT
+    return carNFT;
 }
 
 export { register, getContract }
