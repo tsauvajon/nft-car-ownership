@@ -6,6 +6,7 @@
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
 import HelloWorld from "./components/HelloWorld.vue";
+import { ActionTypes } from "@/store/index";
 
 @Options({
   components: {
@@ -14,7 +15,7 @@ import HelloWorld from "./components/HelloWorld.vue";
 })
 export default class App extends Vue {
   async beforeCreate(): Promise<void> {
-    await this.$store.dispatch("registerWeb3");
+    await this.$store.dispatch(ActionTypes.REGISTER_WEB3);
   }
 }
 </script>
