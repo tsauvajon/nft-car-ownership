@@ -12,7 +12,11 @@ import HelloWorld from "./components/HelloWorld.vue";
     HelloWorld,
   },
 })
-export default class App extends Vue {}
+export default class App extends Vue {
+  async beforeCreate(): Promise<void> {
+    await this.$store.dispatch("registerWeb3");
+  }
+}
 </script>
 
 <style>

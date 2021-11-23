@@ -3,48 +3,67 @@ import { useToast } from "vue-toastification";
 
 const toast = useToast();
 
-// Call a tx, and display an error if it fails.
-// Returns true if the call succeeds.
-async function tryCall(tx: ContractSendMethod): Promise<any> {
-    try {
-        return await tx.call();
-    } catch (e: any) {
-        console.error(e);
-        toast.error(e.message);
-    }
+// Defined in this repo in `/nft/contracts`
+interface Methods {
+  mint(account: string, tokenID: number): ContractSendMethod;
+  balanceOf(account: string): ContractSendMethod;
+  tokenOfOwnerByIndex(account: string, index: number): ContractSendMethod;
 }
 
-// Range returns an array of Numbers from 0 to length-1.
+// Call a tx, and display an error if it fails.
+// Returns true if the call succeeds.
+/* eslint-disable  @typescript-eslint/no-explicit-any */
+async function tryCall(tx: ContractSendMethod): Promise<any> {
+  try {
+    return await tx.call();
+  } catch (e) {
+    console.error(e);
+    toast.error((<Error>e).message);
+  }
+}
+
+// Range returns an array of numbers from 0 to length-1.
 // For example, range(3) === [0, 1, 2]
-function range(length: Number): Array<Number> {
-    return [...Array(length).keys()]
+function range(length: number): Array<number> {
+  return [...Array(length).keys()];
 }
 
 class CarNFT {
-    contract: Contract
+  contractInstance: Contract;
 
-    constructor(contractInstance: Contract) {
-        this.contract = contractInstance
+  constructor(contractInstance: Contract) {
+    this.contractInstance = contractInstance;
+  }
+
+  methods(): Methods {
+    return this.contractInstance.methods;
+  }
+
+  // Mint a new NFT, by ID.
+  async mint(account: string, tokenID: number): Promise<void> {
+    const tx = await this.methods().mint(account, tokenID);
+    await tryCall(tx);
+  }
+
+  // Get all the NFTs of one owner.
+  async getNFTs(account: string): Promise<Array<number> | undefined> {
+    const balanceTx = await this.methods().balanceOf(account);
+
+    const nftCount = await tryCall(balanceTx);
+
+    if (nftCount === undefined) {
+      return;
     }
 
-    // Mint a new NFT, by ID.
-    async mint(account: string, tokenID: Number): Promise<void> {
-        const tx: ContractSendMethod = await this.contract.methods.mint(account, tokenID);
-        await tryCall(tx);
-    }
+    const ownedNFTs = await Promise.all(
+      range(nftCount).map(async (index) => {
+        const nftTx = await this.methods().tokenOfOwnerByIndex(account, index);
+        return await tryCall(nftTx);
+      })
+    );
 
-    // Get all the NFTs of one owner.
-    async getNFTs(account: string): Promise<Array<Number> | undefined> {
-        const balanceTx: ContractSendMethod = await this.contract.methods.balanceOf(account);
-        const nftCount = await tryCall(balanceTx);
-
-        if (nftCount === undefined) { return; }
-
-        const ownedNFTs = await Promise.all(range(nftCount).map(async index => {
-            const nftTx = await this.contract.methods.tokenOfOwnerByIndex(account, index)
-            return await tryCall(nftTx);
-        }))
-
-        return ownedNFTs;
-    }
+    return ownedNFTs;
+  }
 }
+
+export default CarNFT;

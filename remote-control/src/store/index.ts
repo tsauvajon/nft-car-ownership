@@ -3,6 +3,7 @@ import { createStore, MutationTree, Store } from "vuex";
 import Web3 from "web3";
 import { useToast } from "vue-toastification";
 // import { register, getContract } from "@/ethereum/register";
+import CarNFT from "../contract/car-nft";
 
 const toast = useToast();
 
@@ -11,7 +12,7 @@ declare module "@vue/runtime-core" {
     web3: Web3 | null;
     error: string | null;
     account: string | null;
-    // contract: any;
+    contract: CarNFT | null;
   }
 
   interface ComponentCustomProperties {
@@ -25,12 +26,12 @@ const state: State = {
   web3: null,
   error: null,
   account: null,
-  // contract: null,
+  contract: null,
 };
 
 enum MutationTypes {
   REGISTER_WEB3_INSTANCE = "REGISTER_WEB3_INSTANCE",
-  // const REGISTER_CONTRACT_INSTANCE = "REGISTER_CONTRACT_INSTANCE"
+  REGISTER_CONTRACT_INSTANCE = "REGISTER_CONTRACT_INSTANCE",
   SET_ACCOUNT = "SET_ACCOUNT",
   SET_ERROR = "SET_ERROR",
 }
@@ -51,10 +52,10 @@ const mutations: MutationTree<State> & Mutations = {
     state.web3 = web3;
   },
 
-  // // [REGISTER_CONTRACT_INSTANCE](state, { contractInstance }) {
-  // // window.contractInstance = contractInstance
-  // // state.contract = new BlobContract(contractInstance)
-  // // },
+  [MutationTypes.REGISTER_CONTRACT_INSTANCE](state, { contractInstance }) {
+    window.contractInstance = contractInstance;
+    state.contract = new CarNFT(contractInstance);
+  },
 
   [MutationTypes.SET_ACCOUNT](state, { account }) {
     state.account = account;

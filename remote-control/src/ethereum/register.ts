@@ -7,7 +7,7 @@ declare global {
     interface Window {
         ethereum: any; // Injected by Metamask.
         web3: Web3; // Injected by us to help with debugging.
-        carNFT: Contract; // Injected by us to help with debugging.
+        contractInstance: Contract; // Injected by us to help with debugging.
     }
 }
 
@@ -20,7 +20,7 @@ interface ContractMetadata {
     };
 }
 
-function register(): Promise<any> {
+function register(): Promise<{ web3: Web3 }> {
     return new Promise(function (resolve, reject) {
         // Metamask injects its web3 instance into window.ethereum
         const ethereum = window.ethereum;
@@ -59,7 +59,7 @@ async function getContract(web3: Web3): Promise<Contract> {
     }
 
     const carNFT = new web3.eth.Contract(CarNFTContractMetadata.abi, address);
-    window.carNFT = carNFT;
+    window.contractInstance = carNFT;
 
     return carNFT;
 }
