@@ -3,6 +3,7 @@ import { ActionContext, ActionTree } from "vuex";
 import { useToast } from "vue-toastification";
 import { register, getContract } from "@/ethereum/register";
 import { Mutations, MutationTypes } from "./mutations";
+import { AbstractProvider, RequestArguments } from "web3-core";
 import Web3 from "web3";
 
 const toast = useToast();
@@ -28,16 +29,8 @@ interface Actions {
   }: AugmentedActionContext): Promise<void>;
 }
 
-interface EthereumProvider {
-  request(params: { method: string; params: Array<unknown> }): void;
-}
-
-// Can't merge with EthereumProvider, because while it overlaps
-// with AbstractProvider (that has a request method),
-// it doesn't overlap with anything that has the 'on' method.
-// I'm not too sure where 'on' is coming from or how to merge
-// these two interfaces properly.
-interface WTF {
+interface EthereumProvider extends AbstractProvider {
+  request(params: RequestArguments): Promise<unknown>;
   on(event: string, callback: (data: Array<string>) => void): void;
 }
 
@@ -82,7 +75,7 @@ const actions: ActionTree<State, State> & Actions = {
 
   [ActionTypes.REGISTER_HOOKS]({ commit, dispatch, state }) {
     // Need to cast to unknown first to satisfy TypeScript.
-    const provider = state.web3?.eth.currentProvider as unknown as WTF;
+    const provider = state.web3?.currentProvider as EthereumProvider;
     const reloadWindow = () => window.location.reload();
 
     // If the network changes or the user disconnects their account, reload the app
