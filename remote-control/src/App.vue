@@ -6,7 +6,7 @@
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
 import HelloWorld from "./components/HelloWorld.vue";
-import { ActionTypes } from "@/store/index";
+import { ActionTypes } from "@/store/actions";
 
 @Options({
   components: {
