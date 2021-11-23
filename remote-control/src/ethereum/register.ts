@@ -1,6 +1,7 @@
 import Web3 from "web3";
-const CarNFTContractMetadata = require("../../../nft/build/contracts/CarNFT.json");
+const CarNFTContractMetadata: ContractMetadata = require("../../../nft/build/contracts/CarNFT.json");
 import { Contract } from "web3-eth-contract";
+import { AbiItem } from "web3-utils";
 
 declare global {
     interface Window {
@@ -8,6 +9,15 @@ declare global {
         web3: Web3; // Injected by us to help with debugging.
         carNFT: Contract; // Injected by us to help with debugging.
     }
+}
+
+interface ContractMetadata {
+    abi: Array<AbiItem>;
+    networks: {
+        [network: number]: {
+            address: string;
+        };
+    };
 }
 
 function register(): Promise<any> {

@@ -1,4 +1,3 @@
-import Web3 from "web3";
 import { Contract, ContractSendMethod } from "web3-eth-contract";
 import { useToast } from "vue-toastification";
 
