@@ -21,9 +21,7 @@ type Mutations<S = State> = {
   ): void;
 
   [MutationTypes.SET_ACCOUNT](state: S, payload: { account: string }): void;
-
   [MutationTypes.SET_NFTS](state: S, payload: { nfts: Array<NFT> }): void;
-
   [MutationTypes.SET_ERROR](state: S, error: string): void;
 };
 

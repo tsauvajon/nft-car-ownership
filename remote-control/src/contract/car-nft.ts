@@ -1,4 +1,4 @@
-import { Contract, ContractSendMethod } from "web3-eth-contract";
+import { Contract, ContractSendMethod, SendOptions } from "web3-eth-contract";
 import { useToast } from "vue-toastification";
 
 const toast = useToast();
@@ -26,6 +26,21 @@ async function tryCall(tx: ContractSendMethod): Promise<any> {
   }
 }
 
+// Send a tx, and display an error if it fails.
+// Returns true if the send succeeds.
+/* eslint-disable  @typescript-eslint/no-explicit-any */
+async function trySend(
+  tx: ContractSendMethod,
+  options: SendOptions
+): Promise<any> {
+  try {
+    return await tx.send(options);
+  } catch (e) {
+    console.error(e);
+    toast.error((<Error>e).message);
+  }
+}
+
 // Range returns an array of numbers from 0 to length-1.
 // For example, range(3) === [0, 1, 2]
 function range(length: number): Array<number> {
@@ -46,11 +61,12 @@ class CarNFT {
   // Mint a new NFT, by ID.
   async mint(account: string, tokenID: number): Promise<void> {
     const tx = await this.methods().mint(account, tokenID);
-    await tryCall(tx);
+    const result = await trySend(tx, { from: account });
+    console.log("mint result", result);
   }
 
   // Get all the NFTs of one owner.
-  async getNFTs(account: string): Promise<Array<number> | undefined> {
+  async getNFTs(account: string): Promise<Array<NFT> | undefined> {
     const balanceTx = await this.methods().balanceOf(account);
 
     const nftCountStr: string = await tryCall(balanceTx);
@@ -67,7 +83,8 @@ class CarNFT {
       })
     );
 
-    return ownedNFTs;
+    // TODO: use BN.js
+    return ownedNFTs.map((id) => ({ id: parseInt(id) }));
   }
 }
 

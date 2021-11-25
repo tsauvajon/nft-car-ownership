@@ -10,11 +10,12 @@ const toast = useToast();
 const RinkebyChainId = "0x4"; // must be in hexadecimal.
 
 enum ActionTypes {
-  REGISTER_WEB3 = "REGISTER_WEB3",
-  REGISTER_HOOKS = "REGISTER_HOOKS",
-  REGISTER_CONTRACT = "REGISTER_CONTRACT",
   CONNECT_ACCOUNT = "CONNECT_ACCOUNT",
+  MINT = "MINT",
   REFRESH_NFTS = "REFRESH_NFTS",
+  REGISTER_CONTRACT = "REGISTER_CONTRACT",
+  REGISTER_HOOKS = "REGISTER_HOOKS",
+  REGISTER_WEB3 = "REGISTER_WEB3",
 }
 
 type AugmentedActionContext = {
@@ -25,6 +26,11 @@ type AugmentedActionContext = {
 } & Omit<ActionContext<State, State>, "commit">;
 
 interface Actions {
+  [ActionTypes.MINT](
+    { dispatch, state }: AugmentedActionContext,
+    id: number
+  ): Promise<void>;
+
   [ActionTypes.REGISTER_WEB3]({
     commit,
   }: AugmentedActionContext): Promise<void>;
@@ -39,6 +45,73 @@ interface EthereumProvider extends AbstractProvider {
 }
 
 const actions: ActionTree<State, State> & Actions = {
+  async [ActionTypes.CONNECT_ACCOUNT]({ commit, dispatch, state }) {
+    // TODO: store in a cookie so we don't have to connect every time
+    let account;
+    try {
+      const accounts = await (<Web3>state.web3).eth.requestAccounts();
+      // According to the Metamask documentation, it currently always returns 1 account.
+      account = accounts[0];
+    } catch (e) {
+      toast.error((<Error>e).message);
+      return;
+    }
+
+    toast.success(`Account ${account.substring(0, 6)}... connected!`);
+
+    commit(MutationTypes.SET_ACCOUNT, { account });
+    dispatch(ActionTypes.REFRESH_NFTS);
+  },
+
+  async [ActionTypes.MINT]({ dispatch, state }, id) {
+    await state.contract?.mint(<string>state.account, id);
+
+    toast.success(`Car ${id} registered`);
+
+    dispatch(ActionTypes.REFRESH_NFTS);
+  },
+
+  async [ActionTypes.REFRESH_NFTS]({ commit, state }) {
+    const nfts = await state.contract?.getNFTs(<string>state.account);
+    console.log(nfts);
+
+    commit(MutationTypes.SET_NFTS, { nfts });
+    toast.info("NFTs refreshed!");
+  },
+
+  [ActionTypes.REGISTER_HOOKS]({ commit, dispatch, state }) {
+    // Need to cast to unknown first to satisfy TypeScript.
+    const provider = state.web3?.currentProvider as EthereumProvider;
+    const reloadWindow = () => window.location.reload();
+
+    // If the network changes or the user disconnects their account, reload the entire app.
+    provider.on("chainChanged", reloadWindow);
+    provider.on("disconnect", reloadWindow);
+
+    provider.on("accountsChanged", (accounts: Array<string>) => {
+      // Only 1 account returned by MetaMask,
+      // see https://docs.metamask.io/guide/ethereum-provider.html#events.
+      const account = accounts[0];
+      console.log("account changed:", account);
+
+      commit(MutationTypes.SET_ACCOUNT, { account });
+      dispatch(ActionTypes.REFRESH_NFTS);
+    });
+  },
+
+  async [ActionTypes.REGISTER_CONTRACT]({ commit, state }) {
+    let contractInstance;
+    try {
+      contractInstance = await getContract(<Web3>state.web3);
+    } catch (e) {
+      console.error("register contract instance: ", e);
+      commit(MutationTypes.SET_ERROR, (<Error>e).message);
+    }
+
+    commit(MutationTypes.REGISTER_CONTRACT_INSTANCE, { contractInstance });
+    toast.success("Connected to the smart contract");
+  },
+
   async [ActionTypes.REGISTER_WEB3]({ commit, dispatch, state }) {
     let result;
     try {
@@ -75,65 +148,6 @@ const actions: ActionTree<State, State> & Actions = {
     }
 
     dispatch(ActionTypes.REGISTER_CONTRACT);
-  },
-
-  [ActionTypes.REGISTER_HOOKS]({ commit, dispatch, state }) {
-    // Need to cast to unknown first to satisfy TypeScript.
-    const provider = state.web3?.currentProvider as EthereumProvider;
-    const reloadWindow = () => window.location.reload();
-
-    // If the network changes or the user disconnects their account, reload the entire app.
-    provider.on("chainChanged", reloadWindow);
-    provider.on("disconnect", reloadWindow);
-
-    provider.on("accountsChanged", (accounts: Array<string>) => {
-      // Only 1 account returned by MetaMask,
-      // see https://docs.metamask.io/guide/ethereum-provider.html#events.
-      const account = accounts[0];
-      console.log("account changed:", account);
-
-      commit(MutationTypes.SET_ACCOUNT, { account });
-      dispatch(ActionTypes.REFRESH_NFTS);
-    });
-  },
-
-  async [ActionTypes.REGISTER_CONTRACT]({ commit, state }) {
-    let contractInstance;
-    try {
-      contractInstance = await getContract(<Web3>state.web3);
-    } catch (e) {
-      console.error("register contract instance: ", e);
-      commit(MutationTypes.SET_ERROR, (<Error>e).message);
-    }
-
-    commit(MutationTypes.REGISTER_CONTRACT_INSTANCE, { contractInstance });
-    toast.success("Connected to the smart contract");
-  },
-
-  async [ActionTypes.CONNECT_ACCOUNT]({ commit, dispatch, state }) {
-    // TODO: store in a cookie so we don't have to connect every time
-    let account;
-    try {
-      const accounts = await (<Web3>state.web3).eth.requestAccounts();
-      // According to the Metamask documentation, it currently always returns 1 account.
-      account = accounts[0];
-    } catch (e) {
-      toast.error((<Error>e).message);
-      return;
-    }
-
-    toast.success(`Account ${account.substring(0, 6)}... connected!`);
-
-    commit(MutationTypes.SET_ACCOUNT, { account });
-    dispatch(ActionTypes.REFRESH_NFTS);
-  },
-
-  async [ActionTypes.REFRESH_NFTS]({ commit, state }) {
-    const nfts = await state.contract?.getNFTs(<string>state.account);
-    console.log(nfts);
-
-    commit(MutationTypes.SET_NFTS, { nfts });
-    toast.info("NFTs refreshed!");
   },
 };
 

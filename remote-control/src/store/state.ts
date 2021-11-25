@@ -1,10 +1,9 @@
 import CarNFT, { NFT } from "@/contract/car-nft";
-import { State } from "@vue/runtime-core";
 import { Store } from "vuex";
 import Web3 from "web3";
 
 declare module "@vue/runtime-core" {
-  interface State {
+  export interface State {
     web3: Web3 | null;
     error: string | null;
     account: string | null;
@@ -17,7 +16,7 @@ declare module "@vue/runtime-core" {
   }
 }
 
-const state: State = {
+export const state = {
   web3: null,
   error: null,
   account: null,
@@ -25,4 +24,4 @@ const state: State = {
   nfts: null,
 };
 
-export { state };
+export type State = typeof state;
