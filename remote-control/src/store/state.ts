@@ -1,7 +1,7 @@
+import CarNFT, { NFT } from "@/contract/car-nft";
 import { State } from "@vue/runtime-core";
 import { Store } from "vuex";
 import Web3 from "web3";
-import CarNFT, { NFT } from "@/contract/car-nft";
 
 declare module "@vue/runtime-core" {
   interface State {

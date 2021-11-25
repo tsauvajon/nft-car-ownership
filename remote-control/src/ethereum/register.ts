@@ -1,9 +1,9 @@
-import Web3 from "web3";
-import { Contract } from "web3-eth-contract";
 import { AbiItem } from "web3-utils";
-import detectEthereumProvider from "@metamask/detect-provider";
 import { AbstractProvider } from "web3-core";
 import CarNftOutput from "../../../nft/build/contracts/CarNFT.json";
+import { Contract } from "web3-eth-contract";
+import Web3 from "web3";
+import detectEthereumProvider from "@metamask/detect-provider";
 
 const CarNFTContractMetadata = CarNftOutput as ContractMetadata;
 

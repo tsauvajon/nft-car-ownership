@@ -1,10 +1,10 @@
-import { State } from "@vue/runtime-core";
-import { ActionContext, ActionTree } from "vuex";
-import { useToast } from "vue-toastification";
-import { register, getContract } from "@/ethereum/register";
-import { Mutations, MutationTypes } from "./mutations";
 import { AbstractProvider, RequestArguments } from "web3-core";
+import { ActionContext, ActionTree } from "vuex";
+import { MutationTypes, Mutations } from "./mutations";
+import { getContract, register } from "@/ethereum/register";
+import { State } from "@vue/runtime-core";
 import Web3 from "web3";
+import { useToast } from "vue-toastification";
 
 const toast = useToast();
 const RinkebyChainId = "0x4"; // must be in hexadecimal.
@@ -32,7 +32,10 @@ interface Actions {
 
 interface EthereumProvider extends AbstractProvider {
   request(params: RequestArguments): Promise<unknown>;
-  on(event: string, callback: (data: Array<string>) => void): void;
+  on(
+    event: string,
+    callback: (() => void) | ((data: Array<string>) => void)
+  ): void;
 }
 
 const actions: ActionTree<State, State> & Actions = {

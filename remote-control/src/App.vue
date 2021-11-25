@@ -1,11 +1,11 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png" />
+  <img alt="Vue logo" src="@/assets/logo.png" />
   <AccountConnector msg="Welcome to Your Vue.js + TypeScript App" />
 </template>
 
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
-import AccountConnector from "./components/AccountConnector.vue";
+import AccountConnector from "@/components/AccountConnector.vue";
 import { ActionTypes } from "@/store/actions";
 
 @Options({

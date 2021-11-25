@@ -1,9 +1,8 @@
-import { createApp } from "vue";
-import App from "./App.vue";
-import store from "./store";
-import Toast, { PluginOptions, POSITION } from "vue-toastification";
-
 import "vue-toastification/dist/index.css";
+import Toast, { POSITION, PluginOptions } from "vue-toastification";
+import App from "@/App.vue";
+import { createApp } from "vue";
+import store from "@/store";
 
 const options: PluginOptions = {
   position: POSITION.TOP_RIGHT,
