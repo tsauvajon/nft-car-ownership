@@ -8,6 +8,7 @@ interface Methods {
   mint(account: string, tokenID: number): ContractSendMethod;
   balanceOf(account: string): ContractSendMethod;
   tokenOfOwnerByIndex(account: string, index: number): ContractSendMethod;
+  transferFrom(from: string, to: string, tokenID: number): ContractSendMethod;
 }
 
 export interface NFT {
@@ -60,15 +61,14 @@ class CarNFT {
 
   // Mint a new NFT, by ID.
   async mint(account: string, tokenID: number): Promise<void> {
-    const tx = await this.methods().mint(account, tokenID);
+    const tx = this.methods().mint(account, tokenID);
     const result = await trySend(tx, { from: account });
     console.log("mint result", result);
   }
 
   // Get all the NFTs of one owner.
   async getNFTs(account: string): Promise<Array<NFT> | undefined> {
-    const balanceTx = await this.methods().balanceOf(account);
-
+    const balanceTx = this.methods().balanceOf(account);
     const nftCountStr: string = await tryCall(balanceTx);
 
     if (nftCountStr === undefined) {
@@ -78,13 +78,18 @@ class CarNFT {
     const nftCount = parseInt(nftCountStr);
     const ownedNFTs = await Promise.all(
       range(nftCount).map(async (index) => {
-        const nftTx = await this.methods().tokenOfOwnerByIndex(account, index);
+        const nftTx = this.methods().tokenOfOwnerByIndex(account, index);
         return await tryCall(nftTx);
       })
     );
 
     // TODO: use BN.js
     return ownedNFTs.map((id) => ({ id: parseInt(id) }));
+  }
+
+  async transfer(from: string, to: string, tokenID: number): Promise<void> {
+    const tx = this.methods().transferFrom(from, to, tokenID);
+    return trySend(tx, { from });
   }
 }
 

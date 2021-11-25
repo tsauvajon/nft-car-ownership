@@ -1,8 +1,9 @@
 <template>
-  <img alt="Vue logo" src="@/assets/logo.png" />
   <template v-if="isConnected">
+    <br /><br />
     <Mint />
-    <NFTs />
+    <br /><br />
+    <NFTs v-if="areNFTsLoaded" />
   </template>
   <AccountConnector v-else msg="Welcome to Your Vue.js + TypeScript App" />
 </template>
@@ -24,6 +25,10 @@ import NFTs from "@/components/NFTs.vue";
 export default class App extends Vue {
   get isConnected(): boolean {
     return this.$store.getters.isConnected;
+  }
+
+  get areNFTsLoaded(): boolean {
+    return this.$store.getters.nfts !== null;
   }
 
   async beforeCreate(): Promise<void> {

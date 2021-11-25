@@ -16,6 +16,7 @@ enum ActionTypes {
   REGISTER_CONTRACT = "REGISTER_CONTRACT",
   REGISTER_HOOKS = "REGISTER_HOOKS",
   REGISTER_WEB3 = "REGISTER_WEB3",
+  TRANSFER = "TRANSFER",
 }
 
 type AugmentedActionContext = {
@@ -27,13 +28,18 @@ type AugmentedActionContext = {
 
 interface Actions {
   [ActionTypes.MINT](
-    { dispatch, state }: AugmentedActionContext,
+    context: AugmentedActionContext,
     id: number
   ): Promise<void>;
 
   [ActionTypes.REGISTER_WEB3]({
     commit,
   }: AugmentedActionContext): Promise<void>;
+
+  [ActionTypes.TRANSFER](
+    context: AugmentedActionContext,
+    data: { to: string; tokenID: number }
+  ): Promise<void>;
 }
 
 interface EthereumProvider extends AbstractProvider {
@@ -73,7 +79,6 @@ const actions: ActionTree<State, State> & Actions = {
 
   async [ActionTypes.REFRESH_NFTS]({ commit, state }) {
     const nfts = await state.contract?.getNFTs(<string>state.account);
-    console.log(nfts);
 
     commit(MutationTypes.SET_NFTS, { nfts });
     toast.info("NFTs refreshed!");
@@ -148,6 +153,14 @@ const actions: ActionTree<State, State> & Actions = {
     }
 
     dispatch(ActionTypes.REGISTER_CONTRACT);
+  },
+
+  async [ActionTypes.TRANSFER]({ dispatch, state }, { to, tokenID }) {
+    await state.contract?.transfer(<string>state.account, to, tokenID);
+
+    toast.success(`Car sent to ${to.substring(0, 6)}...`);
+
+    dispatch(ActionTypes.REFRESH_NFTS);
   },
 };
 

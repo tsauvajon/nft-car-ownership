@@ -1,25 +1,21 @@
 <template>
   <div>
-    <div v-for="nft in nfts" :key="nft.id">
-      Car #{{ nft.id }}<br />
-      <button>Open</button> - <button>Close</button><br />
-    </div>
+    <NFT :id="nft.id" v-for="nft in nfts" :key="nft.id" />
   </div>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
-import { NFT } from "@/contract/car-nft";
+import { NFT as CarNFT } from "@/contract/car-nft";
+import NFT from "@/components/NFT.vue";
 
 @Options({
-  props: {
-    msg: String,
+  components: {
+    NFT,
   },
 })
 export default class AccountConnector extends Vue {
-  msg!: string;
-
-  get nfts(): Array<NFT> | null {
+  get nfts(): Array<CarNFT> | null {
     return this.$store.getters.nfts;
   }
 }

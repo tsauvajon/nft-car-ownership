@@ -5,17 +5,10 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from "vue-class-component";
 import { ActionTypes } from "@/store/actions";
+import { Vue } from "vue-class-component";
 
-@Options({
-  props: {
-    msg: String,
-  },
-})
 export default class AccountConnector extends Vue {
-  msg!: string;
-
   async connectAccount(): Promise<void> {
     await this.$store.dispatch(ActionTypes.CONNECT_ACCOUNT);
   }
