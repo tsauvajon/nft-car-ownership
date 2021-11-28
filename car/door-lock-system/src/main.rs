@@ -8,13 +8,10 @@ use yew::agent::Bridged;
 use yew::prelude::*;
 
 enum Msg {
-    Open,
-    Close,
     NewCommand(String),
 }
 
 struct App {
-    link: ComponentLink<Self>,
     _producer: Box<dyn Bridge<EventBus>>,
 
     open: bool,
@@ -28,7 +25,6 @@ impl Component for App {
     fn create(_props: Self::Properties, link: ComponentLink<Self>) -> Self {
         Self {
             _producer: EventBus::bridge((&link).callback(Msg::NewCommand)),
-            link,
             open: false,
             error: None,
         }
@@ -42,14 +38,6 @@ impl Component for App {
                     "close the car!!" => self.open = false,
                     _ => self.error = Some(format!("unknown command: {:?}", cmd)),
                 };
-                true
-            }
-            Msg::Open => {
-                self.open = true;
-                true
-            }
-            Msg::Close => {
-                self.open = false;
                 true
             }
         }
