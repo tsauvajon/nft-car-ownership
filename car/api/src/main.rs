@@ -1,14 +1,17 @@
 mod car_commands;
+mod nft;
 mod pool;
 mod websocket;
 
 use actix::prelude::*;
 use actix_cors::Cors;
-use actix_web::{http::header, web, App, HttpServer};
+use actix_web::{web, App, HttpServer};
 use pool::Pool;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    nft::accounts().await.unwrap();
+
     let pool = Pool::default().start();
 
     HttpServer::new(move || {

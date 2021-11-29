@@ -1,6 +1,6 @@
 use crate::pool::{Pool, WsMessage};
 use actix::prelude::*;
-use actix::{fut, ActorContext, ActorFuture, ContextFutureSpawner, WrapFuture};
+use actix::{fut, ActorContext, ContextFutureSpawner, WrapFuture};
 use actix_web::{web, web::Data, Error, HttpRequest, HttpResponse};
 use actix_web_actors::ws;
 

@@ -21,3 +21,8 @@ Downsides (they can be mitigated):
 - subject to DDoS attacks
 - if you lose your private key, you lose your car
 - added cybersecurity challenges
+
+
+# TODO
+
+Shared configuration (ports, web3 API address...)

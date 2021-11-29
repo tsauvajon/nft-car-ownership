@@ -12,3 +12,8 @@ So the calls need to be signed with a wallet, somehow.
 ## Framework
 
 I chose Actix Web over Rocket, because Rocket requires nightly and I wanted to stay on stable.
+
+After moving further with the project, I found that due to differences
+in Tokio versions between `actix-web` v3 and `web3` v0.17, I had to use
+`actix-web` v4, that is a beta right now (Nov 2021). I also had to use
+`actix-cors` and `actix-web-actors` on beta versions.
