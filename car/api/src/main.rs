@@ -10,8 +10,6 @@ use pool::Pool;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    nft::accounts().await.unwrap();
-
     let pool = Pool::default().start();
 
     HttpServer::new(move || {

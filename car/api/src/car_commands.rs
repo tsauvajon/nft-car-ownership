@@ -1,3 +1,4 @@
+use crate::nft;
 use crate::pool::Pool;
 use actix::prelude::*;
 use actix_web::{web::Data, Responder};
@@ -15,6 +16,9 @@ impl Handler<OpenTheCar> for Pool {
 }
 
 pub async fn open(pool: Data<Addr<Pool>>) -> impl Responder {
+    let car_owner = nft::get_car_owner().await.unwrap();
+    println!("owner: {:?}", car_owner);
+
     pool.try_send(OpenTheCar {}).unwrap();
     "Opening the car!"
 }

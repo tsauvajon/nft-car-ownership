@@ -1,17 +1,28 @@
-pub async fn accounts() -> web3::Result<()> {
+use hex_literal::hex;
+use web3::{
+    contract::{Contract, Options},
+    types::{Address, U256},
+};
+
+pub async fn get_car_owner() -> web3::Result<Address> {
     let transport = web3::transports::Http::new(
         "https://eth-rinkeby.alchemyapi.io/v2/0hNqd5zfmqjAkLuwmphxjg_v6gEaOkiH",
     )?;
     let web3 = web3::Web3::new(transport);
 
-    let accounts = web3.eth().accounts().await?;
-    println!("Accounts: {:?}", accounts);
+    // TODO: get from the JSON instead (strip 0x)
+    let contract_address: Address = hex!("9F6eddB2Df4bE6e95fca79d1b1737F483CC6027d").into();
+    let contract = Contract::from_json(
+        web3.eth(),
+        contract_address,
+        include_bytes!("../../../nft/build/abi.json"),
+    )
+    .unwrap();
 
-    println!("Calling balance.");
-    for account in accounts {
-        let balance = web3.eth().balance(account, None).await?;
-        println!("Balance of {:?}: {}", account, balance);
-    }
+    let result = contract
+        .query("ownerOf", (U256::from(37),), None, Options::default(), None)
+        .await
+        .unwrap();
 
-    Ok(())
+    Ok(result)
 }
