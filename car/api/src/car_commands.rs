@@ -1,43 +1,9 @@
 use crate::nft;
+use crate::philips_hue::{change_color, GREEN, RED};
 use crate::pool::Pool;
 
 use actix::prelude::*;
 use actix_web::{web::Data, Responder};
-use hyper::{Client, StatusCode, Uri};
-
-const RED: u32 = 1000;
-const GREEN: u32 = 25000;
-
-pub async fn change_color(hue: u32) {
-    for id in 1..=2 {
-        set_light_color(hue, id).await;
-    }
-}
-
-pub async fn set_light_color(hue: u32, light_id: u32) {
-    let client = Client::new();
-    let uri = format!(
-        "http://192.168.1.33/api/9O2NMKebbLLjIY4Ekxhqa18-jP9hSTp7lp-oXzn1/lights/{:?}/state",
-        light_id
-    )
-    .parse::<Uri>()
-    .unwrap();
-
-    use hyper::{Body, Method, Request};
-    let req = Request::builder()
-        .method(Method::PUT)
-        .uri(uri)
-        .body(Body::from(format!(
-            "{{\"on\":true, \"sat\":254, \"bri\":254,\"hue\":{:?}}}",
-            hue
-        )))
-        .unwrap();
-
-    let resp = client.request(req).await.unwrap();
-    if resp.status() != StatusCode::OK {
-        println!("{:?}: {:?}", resp.status(), resp.body());
-    }
-}
 
 #[derive(Message)]
 #[rtype(result = "()")]

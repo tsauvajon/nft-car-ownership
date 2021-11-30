@@ -1,0 +1,46 @@
+/**
+ * Philips Hue is a line of color changing LED lamps and white
+ * bulbs which can be controlled wirelessly.
+ *
+ * In my case, I have two color LED lamps that I can control with
+ * a simple HTTP API.
+ *
+ * By turning them green on open or red on close, I made my development flow
+ * easier (fewwer ALT+TABs needed), and also had fun with the changing
+ * colors.
+ */
+use hyper::{Client, StatusCode, Uri};
+
+pub const RED: u32 = 1000;
+pub const GREEN: u32 = 25000;
+
+pub async fn change_color(hue: u32) {
+    for id in 1..=2 {
+        set_light_color(hue, id).await;
+    }
+}
+
+async fn set_light_color(hue: u32, light_id: u32) {
+    let client = Client::new();
+    let uri = format!(
+        "http://192.168.1.33/api/9O2NMKebbLLjIY4Ekxhqa18-jP9hSTp7lp-oXzn1/lights/{:?}/state",
+        light_id
+    )
+    .parse::<Uri>()
+    .unwrap();
+
+    use hyper::{Body, Method, Request};
+    let req = Request::builder()
+        .method(Method::PUT)
+        .uri(uri)
+        .body(Body::from(format!(
+            "{{\"on\":true, \"sat\":254, \"bri\":254,\"hue\":{:?}}}",
+            hue
+        )))
+        .unwrap();
+
+    let resp = client.request(req).await.unwrap();
+    if resp.status() != StatusCode::OK {
+        println!("{:?}: {:?}", resp.status(), resp.body());
+    }
+}

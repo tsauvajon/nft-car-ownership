@@ -1,5 +1,6 @@
 mod car_commands;
 mod nft;
+mod philips_hue;
 mod pool;
 mod websocket;
 
