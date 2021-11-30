@@ -4,13 +4,16 @@ use web3::{
     types::{Address, U256},
 };
 
+const OWNER_OF: &str = "ownerOf";
+
 pub async fn get_car_owner() -> web3::Result<Address> {
     let transport = web3::transports::Http::new(
         "https://eth-rinkeby.alchemyapi.io/v2/0hNqd5zfmqjAkLuwmphxjg_v6gEaOkiH",
     )?;
     let web3 = web3::Web3::new(transport);
 
-    // TODO: get from the JSON instead (strip 0x)
+    // TODO: get from the JSON instead (and strip 0x).
+    // (this is the contract owner address, i.e. the address that deployed it unless you change it).
     let contract_address: Address = hex!("9F6eddB2Df4bE6e95fca79d1b1737F483CC6027d").into();
     let contract = Contract::from_json(
         web3.eth(),
@@ -20,7 +23,7 @@ pub async fn get_car_owner() -> web3::Result<Address> {
     .unwrap();
 
     let result = contract
-        .query("ownerOf", (U256::from(37),), None, Options::default(), None)
+        .query(OWNER_OF, (U256::from(37),), None, Options::default(), None)
         .await
         .unwrap();
 
