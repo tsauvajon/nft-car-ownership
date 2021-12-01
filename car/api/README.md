@@ -20,9 +20,10 @@ in Tokio versions between `actix-web` v3 and `web3` v0.17, I had to use
 
 ## TODO
 
-- Deploy on the Raspberry Pi
 - Config!!
+- Build the contract only once, then share along, instead of creating it every single call
 - Blink function with Philips Hue:
   - get the current color into a variable
   - switch back and forth between blink color and current color, with a delay between each change
   - restore current color
+- Deploy on the Raspberry Pi

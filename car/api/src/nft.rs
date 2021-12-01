@@ -16,11 +16,11 @@ pub struct SolcOutput {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct Network {
+struct Network {
     address: String,
 }
 
-pub fn read_compiled_contract() -> Result<SolcOutput, Box<dyn std::error::Error>> {
+fn read_compiled_contract() -> Result<SolcOutput, Box<dyn std::error::Error>> {
     let solc_output: SolcOutput = serde_json::from_slice(
         include_bytes!("../../../nft/build/contracts/CarNFT.json").as_ref(),
     )?;
@@ -28,27 +28,33 @@ pub fn read_compiled_contract() -> Result<SolcOutput, Box<dyn std::error::Error>
     Ok(solc_output)
 }
 
-pub async fn get_car_owner() -> web3::Result<Address> {
+// TODO: call me once and pass me along
+fn get_contract() -> web3::Result<Contract<web3::transports::Http>> {
     let transport = web3::transports::Http::new(
         // TODO: config
         "https://eth-rinkeby.alchemyapi.io/v2/0hNqd5zfmqjAkLuwmphxjg_v6gEaOkiH",
     )?;
     let web3 = web3::Web3::new(transport);
-
     let contract_metadata = read_compiled_contract().unwrap();
 
     let mut contract_address: [u8; 20] = Default::default();
-    contract_address
-        .copy_from_slice(strip_0x_prefix(&contract_metadata.networks["4"].address).as_bytes());
+    contract_address.copy_from_slice(
+        &strip_0x_prefix(&contract_metadata.networks["4"].address).as_bytes()[..20],
+    );
     let contract_address: Address = contract_address.into();
 
     let contract = Contract::from_json(
         web3.eth(),
         contract_address,
-        include_bytes!("../../../nft/build/abi.json"), // TODO: get it from the regular build artifact and extract the ABI.
+        &serde_json::to_vec(&contract_metadata.abi).unwrap(),
     )
     .unwrap();
 
+    Ok(contract)
+}
+
+pub async fn get_car_owner() -> web3::Result<Address> {
+    let contract = get_contract()?;
     let result = contract
         .query(OWNER_OF, (U256::from(37),), None, Options::default(), None)
         .await
