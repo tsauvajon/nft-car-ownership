@@ -1,4 +1,6 @@
 use hex;
+use serde::Deserialize;
+use std::collections::HashMap;
 use web3::{
     contract::{Contract, Options},
     signing::{keccak256, RecoveryError},
@@ -7,6 +9,25 @@ use web3::{
 
 const OWNER_OF: &str = "ownerOf";
 
+#[derive(Deserialize, Debug)]
+pub struct SolcOutput {
+    abi: Vec<HashMap<String, serde_json::Value>>,
+    networks: HashMap<String, Network>,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Network {
+    address: String,
+}
+
+pub fn read_compiled_contract() -> Result<SolcOutput, Box<dyn std::error::Error>> {
+    let solc_output: SolcOutput = serde_json::from_slice(
+        include_bytes!("../../../nft/build/contracts/CarNFT.json").as_ref(),
+    )?;
+
+    Ok(solc_output)
+}
+
 pub async fn get_car_owner() -> web3::Result<Address> {
     let transport = web3::transports::Http::new(
         // TODO: config
@@ -14,10 +35,14 @@ pub async fn get_car_owner() -> web3::Result<Address> {
     )?;
     let web3 = web3::Web3::new(transport);
 
-    // TODO: get from the JSON instead (and strip 0x).
-    // (this is the contract owner address, i.e. the address that deployed it unless you change it).
-    let contract_address: Address =
-        hex_literal::hex!("9F6eddB2Df4bE6e95fca79d1b1737F483CC6027d").into();
+    let contract_metadata = read_compiled_contract().unwrap();
+
+    let mut abcd: [u8; 20] = Default::default();
+    abcd.copy_from_slice(
+        strip_0x_prefix(contract_metadata.networks["4"].address.clone()).as_bytes(),
+    );
+    let contract_address: Address = abcd.into();
+
     let contract = Contract::from_json(
         web3.eth(),
         contract_address,
@@ -33,13 +58,15 @@ pub async fn get_car_owner() -> web3::Result<Address> {
     Ok(result)
 }
 
-pub fn get_message_signer(message: String, signature: String) -> Result<Address, RecoveryError> {
-    let raw_signature = match signature.strip_prefix("0x") {
+fn strip_0x_prefix(data: String) -> String {
+    match data.strip_prefix("0x") {
         Some(stripped) => stripped.to_string(),
-        None => signature,
-    };
+        None => data,
+    }
+}
 
-    let decoded_signature = hex::decode(raw_signature).unwrap();
+pub fn get_message_signer(message: String, signature: String) -> Result<Address, RecoveryError> {
+    let decoded_signature = hex::decode(strip_0x_prefix(signature)).unwrap();
     web3::signing::recover(&eth_message(message), &decoded_signature[..64], 0)
 }
 
