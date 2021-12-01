@@ -25,4 +25,7 @@ Downsides (they can be mitigated):
 
 # TODO
 
-Shared configuration (ports, web3 API address...)
+- Shared configuration (ports, web3 API address...)
+- Diagrams:
+  - General flow
+  - Signature (payload + private key => signature /// payload + signature => public key /// check NFT owner to see if it matches the public key)

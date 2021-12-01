@@ -12,7 +12,13 @@
 use hyper::{Client, StatusCode, Uri};
 
 pub const RED: u32 = 1000;
+pub const YELLOW: u32 = 9000;
 pub const GREEN: u32 = 25000;
+
+// TODO: implement me.
+pub async fn blink(hue: u32) {
+    change_color(hue).await;
+}
 
 pub async fn change_color(hue: u32) {
     for id in 1..=2 {
@@ -23,6 +29,7 @@ pub async fn change_color(hue: u32) {
 async fn set_light_color(hue: u32, light_id: u32) {
     let client = Client::new();
     let uri = format!(
+        // TODO: config
         "http://192.168.1.33/api/9O2NMKebbLLjIY4Ekxhqa18-jP9hSTp7lp-oXzn1/lights/{:?}/state",
         light_id
     )
@@ -34,6 +41,7 @@ async fn set_light_color(hue: u32, light_id: u32) {
         .method(Method::PUT)
         .uri(uri)
         .body(Body::from(format!(
+            // TODO: JSON
             "{{\"on\":true, \"sat\":254, \"bri\":254,\"hue\":{:?}}}",
             hue
         )))

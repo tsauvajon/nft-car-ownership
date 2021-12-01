@@ -16,8 +16,8 @@ import { NFT as CarNFT } from "@/contract/car-nft";
 import axios from "axios";
 
 interface SignedPayload {
-  data: string;
-  owner: string;
+  message: string;
+  signature: string;
 }
 
 @Options({
@@ -44,24 +44,28 @@ export default class NFT extends Vue {
 
   // Build and sign an action payload.
   async sign(action: string): Promise<SignedPayload> {
-    const data = JSON.stringify({
+    // TODO: come up with a nonce strategy (e.g. handshake with the car that gives the nonce itself).
+    const nonce = this.$store.state.web3?.utils.keccak256(
+      this.nonce.toString()
+    ) as string;
+    this.nonce++;
+
+    const message = JSON.stringify({
       id: this.id,
-      nonce: this.nonce, // TODO: come up with a nonce strategy
+      nonce,
       action,
     });
 
-    this.nonce++;
-
     const account = this.$store.getters.account;
-    const signedData = await this.$store.state.web3?.eth.personal.sign(
-      data,
+    const signature = (await this.$store.state.web3?.eth.personal.sign(
+      message,
       account,
       ""
-    );
+    )) as string;
 
     const payload: SignedPayload = {
-      data: signedData as string,
-      owner: account,
+      message,
+      signature,
     };
 
     console.log(payload);

@@ -310,8 +310,11 @@ dependencies = [
  "actix-cors",
  "actix-web",
  "actix-web-actors",
+ "hex",
  "hex-literal",
  "hyper",
+ "serde",
+ "serde_json",
  "web3",
 ]
 
