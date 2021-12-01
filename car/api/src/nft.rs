@@ -10,7 +10,7 @@ use web3::{
 const OWNER_OF: &str = "ownerOf";
 
 #[derive(Deserialize, Debug)]
-pub struct SolcOutput {
+struct SolcOutput {
     abi: Vec<HashMap<String, serde_json::Value>>,
     networks: HashMap<String, Network>,
 }
@@ -28,20 +28,17 @@ fn read_compiled_contract() -> Result<SolcOutput, Box<dyn std::error::Error>> {
     Ok(solc_output)
 }
 
-// TODO: call me once and pass me along
 fn get_contract() -> web3::Result<Contract<web3::transports::Http>> {
+    let contract_metadata = read_compiled_contract().unwrap();
+
+    let contract_address = strip_0x_prefix(&contract_metadata.networks["4"].address);
+    let contract_address = Address::from_slice(hex::decode(contract_address).unwrap().as_ref());
+
     let transport = web3::transports::Http::new(
         // TODO: config
         "https://eth-rinkeby.alchemyapi.io/v2/0hNqd5zfmqjAkLuwmphxjg_v6gEaOkiH",
     )?;
     let web3 = web3::Web3::new(transport);
-    let contract_metadata = read_compiled_contract().unwrap();
-
-    let mut contract_address: [u8; 20] = Default::default();
-    contract_address.copy_from_slice(
-        &strip_0x_prefix(&contract_metadata.networks["4"].address).as_bytes()[..20],
-    );
-    let contract_address: Address = contract_address.into();
 
     let contract = Contract::from_json(
         web3.eth(),
