@@ -37,11 +37,10 @@ pub async fn get_car_owner() -> web3::Result<Address> {
 
     let contract_metadata = read_compiled_contract().unwrap();
 
-    let mut abcd: [u8; 20] = Default::default();
-    abcd.copy_from_slice(
-        strip_0x_prefix(contract_metadata.networks["4"].address.clone()).as_bytes(),
-    );
-    let contract_address: Address = abcd.into();
+    let mut contract_address: [u8; 20] = Default::default();
+    contract_address
+        .copy_from_slice(strip_0x_prefix(&contract_metadata.networks["4"].address).as_bytes());
+    let contract_address: Address = contract_address.into();
 
     let contract = Contract::from_json(
         web3.eth(),
@@ -58,15 +57,15 @@ pub async fn get_car_owner() -> web3::Result<Address> {
     Ok(result)
 }
 
-fn strip_0x_prefix(data: String) -> String {
+fn strip_0x_prefix(data: &String) -> String {
     match data.strip_prefix("0x") {
         Some(stripped) => stripped.to_string(),
-        None => data,
+        None => data.to_owned(),
     }
 }
 
 pub fn get_message_signer(message: String, signature: String) -> Result<Address, RecoveryError> {
-    let decoded_signature = hex::decode(strip_0x_prefix(signature)).unwrap();
+    let decoded_signature = hex::decode(strip_0x_prefix(&signature)).unwrap();
     web3::signing::recover(&eth_message(message), &decoded_signature[..64], 0)
 }
 
