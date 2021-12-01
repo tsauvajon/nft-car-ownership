@@ -10,6 +10,7 @@
  * colors.
  */
 use hyper::{Client, StatusCode, Uri};
+use tokio;
 
 pub const RED: u32 = 1000;
 pub const YELLOW: u32 = 9000;
@@ -22,7 +23,9 @@ pub async fn blink(hue: u32) {
 
 pub async fn change_color(hue: u32) {
     for id in 1..=2 {
-        set_light_color(hue, id).await;
+        tokio::spawn(async move {
+            set_light_color(hue, id).await;
+        });
     }
 }
 

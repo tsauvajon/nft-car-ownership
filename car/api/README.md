@@ -22,7 +22,6 @@ in Tokio versions between `actix-web` v3 and `web3` v0.17, I had to use
 
 - Deploy on the Raspberry Pi
 - Config!!
-- Parallelise color changing to avoid weird delays
 - Blink function with Philips Hue:
   - get the current color into a variable
   - switch back and forth between blink color and current color, with a delay between each change

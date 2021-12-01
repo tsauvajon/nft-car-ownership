@@ -22,6 +22,13 @@ Downsides (they can be mitigated):
 - if you lose your private key, you lose your car
 - added cybersecurity challenges
 
+# Implementation
+
+Costs:
+- minting an NFT (gas fee)
+- selling an NFT (gas fee)
+
+Using the NFT to open/close the car is free bcs signature etc.
 
 # TODO
 
