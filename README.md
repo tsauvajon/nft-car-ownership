@@ -65,6 +65,10 @@ In a real-life implementation, we would probably need smarter rules, for example
 
 Gas fees for minting the NFT, paid by the manufacturer.
 
+### Demo
+
+![Bob tries to mint and it gets denied, then the car manufacturer mints](./docs/mint.gif)
+
 ## 2. Someone buys the car
 
 ![buy the NFT, you get full control over the car](./docs/buy_car.png)
@@ -175,6 +179,10 @@ No gas fees - we're just signing a message and sending it outside the Ethereum n
 Checking the Ethereum state is also free. To be totally accurate, you can either have your own nodes that have a copy of the state, in which case you need to maintain your own machines and build an API for them, or you can use a provider (I used [Infura](https://infura.io/)). Most providers would maintain the nodes for you and give you some free requests, but
 you'd have to be on a paid plan to do significant numbers of queries.
 
+### Demo
+
+![Alice unlocks her car by signing a message with her private key](./docs/unlock.gif)
+
 ## 4. The owner resells the car
 
 On a marketplace, directly to someone else...
@@ -194,6 +202,5 @@ Gas fees for transferring the NFT, paid either by the seller or the buyer.
 # TODO
 
 - Shared configuration (ports, web3 API address...)
-- Single setup command for all the parts of the project
+- Single setup command to start all the pieces of the project
 - Allow selling/buying tokens, not just transferring
-- Video demo
