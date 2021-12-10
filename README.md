@@ -6,10 +6,10 @@ This is about ownership!
 ## "Classic" ownership
 
 The regular way of owning a car is buying the keys against money:
-- cash -> not safe for the buyer, not always convenient for the seller
-- regular cheque -> takes time, risky for the seller
-- bank wire -> not convenient and risky for the buyer
-- bank cheque -> slow, not convenient and expensive for the buyer
+- cash -> not safe for the buyer, not always convenient for the seller,
+- regular cheque -> takes time, risky for the seller,
+- bank wire -> not convenient and risky for the buyer,
+- bank cheque -> slow, not convenient and expensive for the buyer.
 
 All of them require a physical exchange of the car keys. And all of them require payment before the keys are transferred to the new owner.
 
@@ -17,14 +17,14 @@ All of them require a physical exchange of the car keys. And all of them require
 
 This project is all about showing an alternate way of thinking about ownership, and especially transferring ownership.
 It comes with its set of challenges and drawbacks, but it improves a few things:
-- it can lessen the need for a legal framework, especially important in less regulated countries. The true ownership is defined programatically, in the Ethereum blockchain
-- transfer of ownership is tied to a pre-defined exchange of money, and both happen at the same time (instead of payments => keys)
-- totally virtual, which can help mitigate physical aggression/theft risk
+- it can lessen the need for a legal framework, which is especially important in less regulated countries. The true ownership is defined programatically, in the Ethereum blockchain,
+- transfer of ownership is tied to a pre-defined exchange of money, and both happen at the same time (instead of payments => keys). In other words, both the NFT and the money get exchanged at exactly the same time, not one after the other,
+- totally virtual, which can help mitigate physical aggression/theft risk.
 
 Downsides (they can be mitigated):
-- subject to DDoS attacks
-- if you lose your private key, you lose your car
-- additional cybersecurity challenges
+- subject to DDoS attacks,
+- if you lose your private key, you lose your car,
+- additional cybersecurity challenges.
 
 ## My implementation
 
@@ -32,11 +32,11 @@ In this repo, you'll find several blocks of software:
 
 ![overview](./docs/overview.png)
 
-- a smart contract, in `./nft`, that allows minting and trading NFTs for the cars
-- a front-end application, in `./remote-control`, that allows sending commands to a car (e.g. "unlock the doors")
+- a smart contract, in `./nft`, that allows minting and trading NFTs for the cars,
+- a front-end application, in `./remote-control`, that allows sending commands to a car (e.g. "unlock the doors"),
 - a mock implementation for a car system:
-  - an outside-facing API 
-  - a front-end aplication that mocks a car being locked or unlocked. Since I don't own a car I can write programs for, this is one solution I found to have a visual demo.
+  - an outside-facing API in `./car/api`,
+  - a front-end aplication that mocks a car being locked or unlocked, in `./car/door-lock-system`. Since I don't own a car I can write programs for, this is one solution I found to have a visual demo.
 
 The "cloud" in the diagram represents the fact that I intentionally abstracted the way we send commands from the Remote Control to the Car API. In my implementation, this is a simple HTTP call. In a real-life implementation, we would could for example go through a car manufacturer public API, that would perform some initial checks and then transmit the commands to the car via MQTT.
 
