@@ -30,7 +30,7 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\n/**\n * @dev A standard for detecting smart contract interfaces. \n * See: https://eips.ethereum.org/EIPS/eip-165.\n */\ninterface ERC165\n{\n\n  /**\n   * @dev Checks if the smart contract includes a specific interface.\n   * This function uses less than 30,000 gas.\n   * @param _interfaceID The interface identifier, as specified in ERC-165.\n   * @return True if _interfaceID is supported, false otherwise.\n   */\n  function supportsInterface(\n    bytes4 _interfaceID\n  )\n    external\n    view\n    returns (bool);\n    \n}\n",
-  "sourcePath": "/Users/thomas/dev/the-future-of-ownership/nft/contracts/0xcert-erc721/utils/erc165.sol",
+  "sourcePath": "/Users/thomas/dev/nft-car-ownership/nft/contracts/0xcert-erc721/utils/erc165.sol",
   "ast": {
     "absolutePath": "project:/contracts/0xcert-erc721/utils/erc165.sol",
     "exportedSymbols": {
@@ -317,7 +317,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.3",
-  "updatedAt": "2021-11-21T17:24:30.769Z",
+  "updatedAt": "2021-12-11T16:38:43.900Z",
   "devdoc": {
     "details": "A standard for detecting smart contract interfaces.  See: https://eips.ethereum.org/EIPS/eip-165.",
     "kind": "dev",

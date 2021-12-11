@@ -2,7 +2,6 @@ const CarNFT = artifacts.require('CarNFT')
 const { expect } = require('chai')
 const truffleAssert = require('truffle-assertions')
 const BN = require('bn.js')
-const { assert } = require('console')
 
 contract('CarNFT', (accounts) => {
     [alice, bob] = accounts

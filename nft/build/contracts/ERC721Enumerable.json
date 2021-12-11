@@ -67,7 +67,7 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\n/**\n * @dev Optional enumeration extension for ERC-721 non-fungible token standard.\n * See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md.\n */\ninterface ERC721Enumerable\n{\n\n  /**\n   * @dev Returns a count of valid NFTs tracked by this contract, where each one of them has an\n   * assigned and queryable owner not equal to the zero address.\n   * @return Total supply of NFTs.\n   */\n  function totalSupply()\n    external\n    view\n    returns (uint256);\n\n  /**\n   * @dev Returns the token identifier for the `_index`th NFT. Sort order is not specified.\n   * @param _index A counter less than `totalSupply()`.\n   * @return Token id.\n   */\n  function tokenByIndex(\n    uint256 _index\n  )\n    external\n    view\n    returns (uint256);\n\n  /**\n   * @dev Returns the token identifier for the `_index`th NFT assigned to `_owner`. Sort order is\n   * not specified. It throws if `_index` >= `balanceOf(_owner)` or if `_owner` is the zero address,\n   * representing invalid NFTs.\n   * @param _owner An address where we are interested in NFTs owned by them.\n   * @param _index A counter less than `balanceOf(_owner)`.\n   * @return Token id.\n   */\n  function tokenOfOwnerByIndex(\n    address _owner,\n    uint256 _index\n  )\n    external\n    view\n    returns (uint256);\n\n}\n",
-  "sourcePath": "/Users/thomas/dev/the-future-of-ownership/nft/contracts/0xcert-erc721/erc721-enumerable.sol",
+  "sourcePath": "/Users/thomas/dev/nft-car-ownership/nft/contracts/0xcert-erc721/erc721-enumerable.sol",
   "ast": {
     "absolutePath": "project:/contracts/0xcert-erc721/erc721-enumerable.sol",
     "exportedSymbols": {
@@ -710,7 +710,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.3",
-  "updatedAt": "2021-11-21T17:24:30.748Z",
+  "updatedAt": "2021-12-11T16:38:43.839Z",
   "devdoc": {
     "details": "Optional enumeration extension for ERC-721 non-fungible token standard. See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md.",
     "kind": "dev",
