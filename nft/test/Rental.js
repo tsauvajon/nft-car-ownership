@@ -2,6 +2,7 @@ const Rental = artifacts.require('Rental')
 const { expect } = require('chai')
 const truffleAssert = require('truffle-assertions')
 const BN = require('bn.js')
+const { time } = require('@openzeppelin/test-helpers')
 
 contract('Rental', (accounts) => {
     [alice, bob] = accounts
@@ -21,6 +22,7 @@ contract('Rental', (accounts) => {
             truffleAssert.eventEmitted(tx, 'Approval', (ev) => {
                 return ev._owner === alice && ev._tokenId.eq(id) && ev._approved === contractInstance.address
             })
+
             truffleAssert.eventEmitted(tx, 'CarListedForRent', (ev) => {
                 return ev._tokenId.eq(id) && ev._price.eq(price)
             })
@@ -42,8 +44,12 @@ contract('Rental', (accounts) => {
         })
 
         it('ok', async () => {
+            const previousBalance = new BN(await web3.eth.getBalance(alice))
+
             const rentalDurationMinutes = new BN(4)
-            const tx = await contractInstance.rent(id, { from: bob, value: price.mul(rentalDurationMinutes) })
+            const value = price.mul(rentalDurationMinutes)
+            const tx = await contractInstance.rent(id, { from: bob, value })
+
             truffleAssert.eventEmitted(tx, 'Transfer', (ev) => {
                 return ev._tokenId.eq(id)
                     && ev._from === alice
@@ -62,6 +68,9 @@ contract('Rental', (accounts) => {
             expect(rental.rentee).to.equal(alice)
             expect(rental.renter).to.equal(bob)
             expect(rental.expiry.toString()).to.equal(expectedTimestamp.toString())
+
+            const balance = await web3.eth.getBalance(alice)
+            expect(balance.toString()).to.equal(previousBalance.add(value).toString())
         })
 
         it('fails if not listed', async () => {
@@ -82,10 +91,45 @@ contract('Rental', (accounts) => {
     })
 
     describe('end rental', () => {
+        const rentalDurationMinutes = new BN(4)
+
+        beforeEach(async () => {
+            await contractInstance.listForRent(id, price, { from: alice })
+            await contractInstance.rent(id, { from: bob, value: price.mul(rentalDurationMinutes) })
+        })
+
         it('ok', async () => {
+            const rental = await contractInstance.activeRentals(id)
+            await time.increaseTo(rental.expiry)
+            const tx = await contractInstance.endRental(id, { from: alice })
+
+            truffleAssert.eventEmitted(tx, 'CarRentalEnded', (ev) => {
+                return ev._tokenId.eq(id)
+                    && ev._rentee === alice
+                    && ev._renter === bob
+            })
         })
 
         it('fails before expiry', async () => {
+            // Rental beginning
+            await truffleAssert.reverts(contractInstance.endRental(id, { from: alice }), 'Rental is not finished')
+
+            // 1 second before the end of the rental
+            const rental = await contractInstance.activeRentals(id)
+            await time.increaseTo(rental.expiry.subn(1))
+            await truffleAssert.reverts(contractInstance.endRental(id, { from: alice }), 'Rental is not finished')
+        })
+
+        it('fails if the car is not rented', async () => {
+            const id = new BN(9876123)
+            await contractInstance.mint(alice, id)
+            await contractInstance.listForRent(id, price, { from: alice })
+            await truffleAssert.reverts(contractInstance.endRental(id, { from: alice }), 'Car is not rented')
+        })
+
+        it('fails if not the original owner of the NFT', async () => {
+            await time.increase(rentalDurationMinutes.muln(60))
+            await truffleAssert.reverts(contractInstance.endRental(id, { from: bob }), 'revert 003007')
         })
     })
 })

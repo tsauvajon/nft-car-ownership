@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@openzeppelin/test-helpers": "^0.5.15",
     "bn.js": "^5.2.0",
     "chai": "^4.3.4",
     "truffle-assertions": "^0.9.2",

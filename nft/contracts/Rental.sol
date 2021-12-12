@@ -26,14 +26,6 @@ contract Rental is CarNFT, ERC721TokenReceiver {
         _;
     }
 
-    /**
-     * @dev Throws if called by any account other than the owner.
-     */
-    modifier onlyNFTOwner(uint256 _tokenId) {
-        require(msg.sender == activeRentals[_tokenId].rentee, NOT_OWNER);
-        _;
-    }
-
     function listForRent(uint256 _tokenId, uint256 _price)
         public
         isAvailable(_tokenId)
@@ -45,12 +37,28 @@ contract Rental is CarNFT, ERC721TokenReceiver {
         emit CarListedForRent(_tokenId, _price);
     }
 
-    function endRental() public {
-        // TODO: think about how to do this:
-        //   time based e.g. using https://github.com/ethereum-alarm-clock/ethereum-alarm-clock?
-        //   delegate it to some off-chain app?
-        //   owner-triggered, at the risk of not giving the car long enough?
-        // TODO: emit an event
+    function endRental(uint256 _tokenId) public {
+        require(
+            activeRentals[_tokenId].rentee != address(0),
+            "Car is not rented"
+        );
+        require(msg.sender == activeRentals[_tokenId].rentee, NOT_OWNER);
+        require(
+            block.timestamp >= activeRentals[_tokenId].expiry,
+            "Rental is not finished"
+        );
+
+        NFToken(this).safeTransferFrom(
+            address(this),
+            activeRentals[_tokenId].rentee,
+            _tokenId
+        );
+
+        emit CarRentalEnded(
+            _tokenId,
+            activeRentals[_tokenId].rentee,
+            activeRentals[_tokenId].renter
+        );
     }
 
     function onERC721Received(
@@ -77,8 +85,11 @@ contract Rental is CarNFT, ERC721TokenReceiver {
             "Not a multiple of rental price"
         );
 
+        address owner = NFToken(this).ownerOf(_tokenId);
+        payable(owner).transfer(msg.value);
+
         NFToken(this).safeTransferFrom(
-            NFToken(this).ownerOf(_tokenId),
+            owner,
             address(this),
             _tokenId,
             abi.encodePacked(duration) // uint256 to bytes
@@ -91,6 +102,11 @@ contract Rental is CarNFT, ERC721TokenReceiver {
         address indexed _rentee,
         address indexed _renter,
         uint256 _expiry
+    );
+    event CarRentalEnded(
+        uint256 indexed _tokenId,
+        address indexed _rentee,
+        address indexed _renter
     );
 
     // Helpers
