@@ -10,7 +10,7 @@ contract Rental is CarNFT, ERC721TokenReceiver {
     struct RentedCar {
         address rentee; // Car owner who gets money for lending the car.
         address renter; // Person who pays the rent for using the car.
-        uint256 deadline; // When the rental ends.
+        uint256 expiry; // When the rental ends.
     }
 
     mapping(uint256 => RentedCar) public activeRentals;
@@ -54,16 +54,17 @@ contract Rental is CarNFT, ERC721TokenReceiver {
     }
 
     function onERC721Received(
-        address _operator,
+        address,
         address _from,
         uint256 _tokenId,
-        bytes calldata _data
-    ) external onlyNFTOwner(_tokenId) returns (bytes4) {
-        activeRentals[_tokenId] = RentedCar(
-            _from,
-            _operator,
-            block.timestamp + 1 minutes // instead get it from the calldata
-        );
+        bytes calldata data
+    ) external returns (bytes4) {
+        uint256 duration = abi.decode(data, (uint256)) * 1 minutes;
+        uint256 expiry = block.timestamp + duration;
+        RentedCar memory rentalAgreement = RentedCar(_from, tx.origin, expiry);
+        activeRentals[_tokenId] = rentalAgreement;
+
+        emit CarRented(_tokenId, _from, tx.origin, expiry);
 
         return MAGIC_ON_ERC721_RECEIVED;
     }
@@ -71,14 +72,30 @@ contract Rental is CarNFT, ERC721TokenReceiver {
     function rent(uint256 _tokenId) public payable isListed(_tokenId) {
         uint256 duration = msg.value / rentalListings[_tokenId];
         require(duration > 0, "Minimum rental not reached");
+        require(
+            msg.value % rentalListings[_tokenId] == 0,
+            "Not a multiple of rental price"
+        );
 
-        NFToken(this).transferFrom(
+        NFToken(this).safeTransferFrom(
             NFToken(this).ownerOf(_tokenId),
             address(this),
-            _tokenId
+            _tokenId,
+            abi.encodePacked(duration) // uint256 to bytes
         );
-        // TODO: transfer NFT to the contract
     }
 
     event CarListedForRent(uint256 indexed _tokenId, uint256 indexed _price);
+    event CarRented(
+        uint256 indexed _tokenId,
+        address indexed _rentee,
+        address indexed _renter,
+        uint256 _expiry
+    );
+
+    // Helpers
+
+    function blockTimestamp() public view returns (uint256 timestamp) {
+        return block.timestamp;
+    }
 }

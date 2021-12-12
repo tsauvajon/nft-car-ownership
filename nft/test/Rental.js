@@ -19,7 +19,6 @@ contract('Rental', (accounts) => {
             const tx = await contractInstance.listForRent(id, price, { from: alice })
 
             truffleAssert.eventEmitted(tx, 'Approval', (ev) => {
-                console.log(ev._approved, contractInstance.address)
                 return ev._owner === alice && ev._tokenId.eq(id) && ev._approved === contractInstance.address
             })
             truffleAssert.eventEmitted(tx, 'CarListedForRent', (ev) => {
@@ -38,17 +37,47 @@ contract('Rental', (accounts) => {
     })
 
     describe('rent a car', () => {
+        beforeEach(async () => {
+            await contractInstance.listForRent(id, price, { from: alice })
+        })
+
         it('ok', async () => {
+            const rentalDurationMinutes = new BN(4)
+            const tx = await contractInstance.rent(id, { from: bob, value: price.mul(rentalDurationMinutes) })
+            truffleAssert.eventEmitted(tx, 'Transfer', (ev) => {
+                return ev._tokenId.eq(id)
+                    && ev._from === alice
+                    && ev._to === contractInstance.address
+            })
+
+            truffleAssert.eventEmitted(tx, 'CarRented', (ev) => {
+                return ev._tokenId.eq(id)
+                    && ev._rentee === alice
+                    && ev._renter === bob
+            })
+
+            const blockTimestamp = await contractInstance.blockTimestamp()
+            const expectedTimestamp = blockTimestamp.add(rentalDurationMinutes.muln(60))
+            const rental = await contractInstance.activeRentals(id)
+            expect(rental.rentee).to.equal(alice)
+            expect(rental.renter).to.equal(bob)
+            expect(rental.expiry.toString()).to.equal(expectedTimestamp.toString())
         })
 
         it('fails if not listed', async () => {
+            const id = new BN(9999)
+            await contractInstance.mint(alice, id)
+
+            await truffleAssert.reverts(contractInstance.rent(id, { from: bob }), 'Not listed')
         })
 
         it('fails if duration is too short', async () => {
+            await truffleAssert.reverts(contractInstance.rent(id, { from: bob, value: 1 }), 'Minimum rental not reached')
         })
 
-        it('refunds if too much money was given', async () => {
-
+        it('fails if an unexpected amount was paid', async () => {
+            // The contract only accepts multiples of the listed price.
+            await truffleAssert.reverts(contractInstance.rent(id, { from: bob, value: price.addn(3) }), 'Not a multiple of rental price')
         })
     })
 
@@ -56,7 +85,7 @@ contract('Rental', (accounts) => {
         it('ok', async () => {
         })
 
-        it('fails before deadline', async () => {
+        it('fails before expiry', async () => {
         })
     })
 })
