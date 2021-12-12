@@ -5,7 +5,7 @@ import "./0xcert-erc721/erc721-token-receiver.sol";
 import "./CarNFT.sol";
 
 contract Rental is CarNFT, ERC721TokenReceiver {
-    mapping(uint256 => uint256) public rentalListings; // token id => price per day for each car that is available for renting.
+    mapping(uint256 => uint256) public rentalListings; // token id => price per minute for each car that is available for renting.
 
     struct RentedCar {
         address rentee; // Car owner who gets money for lending the car.
@@ -22,7 +22,7 @@ contract Rental is CarNFT, ERC721TokenReceiver {
 
     modifier isAvailable(uint256 _tokenId) {
         require(rentalListings[_tokenId] == 0, "Car is listed for rent");
-        require(activeRentals[_tokenId].rentee != address(0), "Car is rented");
+        require(activeRentals[_tokenId].rentee == address(0), "Car is rented");
         _;
     }
 
@@ -62,7 +62,7 @@ contract Rental is CarNFT, ERC721TokenReceiver {
         activeRentals[_tokenId] = RentedCar(
             _from,
             _operator,
-            block.timestamp + 1 days // instead get it from the calldata
+            block.timestamp + 1 minutes // instead get it from the calldata
         );
 
         return MAGIC_ON_ERC721_RECEIVED;
