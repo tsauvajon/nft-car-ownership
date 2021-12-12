@@ -1,7 +1,7 @@
 ## Design
 
 The car backend can:
-- receive calls to open/close the car
+- receive calls to unlock/lock the car
 - transmit these orders to the car via websocket
 
 Authentication?

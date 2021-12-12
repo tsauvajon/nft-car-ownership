@@ -14,7 +14,7 @@ enum Msg {
 struct App {
     _producer: Box<dyn Bridge<EventBus>>,
 
-    open: bool,
+    unlocked: bool,
     error: Option<String>,
 }
 
@@ -25,7 +25,7 @@ impl Component for App {
     fn create(_props: Self::Properties, link: ComponentLink<Self>) -> Self {
         Self {
             _producer: EventBus::bridge((&link).callback(Msg::NewCommand)),
-            open: false,
+            unlocked: false,
             error: None,
         }
     }
@@ -34,8 +34,8 @@ impl Component for App {
         match msg {
             Msg::NewCommand(cmd) => {
                 match cmd.as_str() {
-                    "open the car!!" => self.open = true,
-                    "close the car!!" => self.open = false,
+                    "unlock the car!!" => self.unlocked = true,
+                    "lock the car!!" => self.unlocked = false,
                     _ => self.error = Some(format!("unknown command: {:?}", cmd)),
                 };
                 true
@@ -50,7 +50,7 @@ impl Component for App {
     fn view(&self) -> Html {
         html! {
             <div>
-                <Car open=self.open />
+                <Car unlocked=self.unlocked />
                 <listener::WebSockerListener />
             </div>
         }

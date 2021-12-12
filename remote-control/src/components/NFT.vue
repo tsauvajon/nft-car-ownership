@@ -1,7 +1,7 @@
 <template>
   <div>
     Car #{{ id }}<br />
-    <button @click="open">Open</button> - <button @click="close">Close</button
+    <button @click="unlock">Unlock</button> - <button @click="lock">Lock</button
     ><br />
     <input v-model="sendToAddress" placeholder="0x..." /><button @click="send">
       Send
@@ -45,14 +45,11 @@ export default class NFT extends Vue {
   // Build and sign an action payload.
   async sign(action: string): Promise<SignedPayload> {
     // TODO: come up with a nonce strategy (e.g. handshake with the car that gives the nonce itself).
-    const nonce = this.$store.state.web3?.utils.keccak256(
-      this.nonce.toString()
-    ) as string;
     this.nonce++;
 
     const message = JSON.stringify({
-      id: this.id,
-      nonce,
+      car_id: this.id,
+      nonce: this.nonce,
       action,
     });
 
@@ -78,7 +75,7 @@ export default class NFT extends Vue {
       const payload = await this.sign(action);
 
       const resp = await axios.post(
-        `http://127.0.0.1:8081/api/${action}`,
+        `http://127.0.0.1:8081/api/command`,
         payload
       );
       if (resp.status !== 200) {
@@ -89,14 +86,14 @@ export default class NFT extends Vue {
     }
   }
 
-  // Open the car
-  async open(): Promise<void> {
-    await this.command("open");
+  // Unlock the car
+  async unlock(): Promise<void> {
+    await this.command("UNLOCK_DOORS");
   }
 
-  // Close the car
-  async close(): Promise<void> {
-    await this.command("close");
+  // Lock the car
+  async lock(): Promise<void> {
+    await this.command("LOCK_DOORS");
   }
 }
 </script>

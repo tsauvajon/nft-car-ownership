@@ -11,6 +11,8 @@ use actix_web::{
 use serde::Deserialize;
 
 const HARDCODED_CAR_ID: u128 = 37;
+const UNLOCK_DOORS: &str = "UNLOCK_DOORS";
+const LOCK_DOORS: &str = "LOCK_DOORS";
 
 #[derive(Deserialize)]
 pub struct SignedPayload {
@@ -20,20 +22,40 @@ pub struct SignedPayload {
 
 #[derive(Deserialize, Debug)]
 pub struct Message {
-    id: u128,
-    nonce: String,
+    car_id: u128,
+    nonce: u128,
     action: String,
 }
 
 #[derive(Message)]
 #[rtype(result = "()")]
-pub struct OpenTheCar {}
+pub struct UnlockTheCar {}
 
-pub async fn open(pool: Data<Addr<Pool>>, payload: Json<SignedPayload>) -> impl Responder {
+impl Handler<UnlockTheCar> for Pool {
+    type Result = ();
+
+    fn handle(&mut self, _msg: UnlockTheCar, _: &mut Context<Self>) {
+        self.send_message("unlock the car!!")
+    }
+}
+
+#[derive(Message)]
+#[rtype(result = "()")]
+pub struct LockTheCar {}
+
+impl Handler<LockTheCar> for Pool {
+    type Result = ();
+
+    fn handle(&mut self, _msg: LockTheCar, _: &mut Context<Self>) {
+        self.send_message("lock the car!!")
+    }
+}
+
+pub async fn execute(pool: Data<Addr<Pool>>, payload: Json<SignedPayload>) -> impl Responder {
     let message: Message = serde_json::from_str(payload.message.as_str())
         .or_else(|e| Err(error::ErrorBadRequest(format!("invalid message: {:?}", e))))?;
 
-    if message.id != HARDCODED_CAR_ID {
+    if message.car_id != HARDCODED_CAR_ID {
         println!("wrong car");
         return Err(error::ErrorBadRequest("wrong car"));
     }
@@ -58,35 +80,17 @@ pub async fn open(pool: Data<Addr<Pool>>, payload: Json<SignedPayload>) -> impl 
         return Err(error::ErrorBadRequest("not the owner"));
     }
 
-    change_color(GREEN).await;
+    match message.action.as_str() {
+        UNLOCK_DOORS => {
+            pool.try_send(UnlockTheCar {}).unwrap();
+            change_color(GREEN).await;
+        }
+        LOCK_DOORS => {
+            pool.try_send(LockTheCar {}).unwrap();
+            change_color(RED).await;
+        }
+        _ => return Err(error::ErrorBadRequest("unknown action")),
+    };
 
-    pool.try_send(OpenTheCar {}).unwrap();
-    Ok("Opening the car!")
-}
-
-impl Handler<OpenTheCar> for Pool {
-    type Result = ();
-
-    fn handle(&mut self, _msg: OpenTheCar, _: &mut Context<Self>) {
-        self.send_message("open the car!!")
-    }
-}
-
-#[derive(Message)]
-#[rtype(result = "()")]
-pub struct CloseTheCar {}
-
-pub async fn close(pool: Data<Addr<Pool>>) -> impl Responder {
-    change_color(RED).await;
-
-    pool.try_send(CloseTheCar {}).unwrap();
-    "Closing the car!"
-}
-
-impl Handler<CloseTheCar> for Pool {
-    type Result = ();
-
-    fn handle(&mut self, _msg: CloseTheCar, _: &mut Context<Self>) {
-        self.send_message("close the car!!")
-    }
+    Ok("Unlocking the car!")
 }

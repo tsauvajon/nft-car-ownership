@@ -24,8 +24,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(cors)
             .service(
                 web::scope("/api")
-                    .route("/open", web::post().to(car_commands::open))
-                    .route("/close", web::post().to(car_commands::close))
+                    .route("/command", web::post().to(car_commands::execute))
                     .route("/ws", web::get().to(websocket::register)),
             )
     })

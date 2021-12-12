@@ -5,7 +5,7 @@
  * In my case, I have two color LED lamps that I can control with
  * a simple HTTP API.
  *
- * By turning them green on open or red on close, I made my development flow
+ * By turning them green on unlock or red on lock, I made my development flow
  * easier (fewwer ALT+TABs needed), and also had fun with the changing
  * colors.
  */

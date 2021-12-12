@@ -6,7 +6,7 @@ pub struct Car {
 
 #[derive(Properties, Clone)]
 pub struct Props {
-    pub open: bool,
+    pub unlocked: bool,
 }
 
 impl Component for Car {
@@ -30,10 +30,10 @@ impl Component for Car {
         html! {
             <>
                 {
-                    if self.props.open {
-                        html! { <img src="open.jpg" /> }
+                    if self.props.unlocked {
+                        html! { <img src="unlocked.jpg" /> }
                     } else {
-                        html! { <img src="closed.jpg" /> }
+                        html! { <img src="locked.jpg" /> }
                     }
                 }
             </>

@@ -110,7 +110,7 @@ You can then communicate your public key to anyone you want to interact with.
 **Sign messages**
 
 By hashing a message with your private key, you get a message signature.
-Anyone is able to validate the signature of the message, if they just know your public key and the message input.
+Anyone is able to compute who signed the message, if they just know the message input and the signature.
 
 ### Owner unlocks the car
 
@@ -121,7 +121,7 @@ To unlock the car (or use the car in any other way), we're not interacting with 
 First, we prepare the command we'll send to the car:
 
 ```yaml
-action: OPEN_DOORS
+action: UNLOCK_DOORS
 car_id: 37
 nonce: 1 # explained below
 ```
@@ -153,7 +153,6 @@ If it is, the car API can simply tell the car lock system to unlock the doors.
 In my implementation, it communicates via WebSockets.
 A real-life implementation would use a more suitable communication method.
 
-
 ### Non-owner tries to unlock the car
 
 If someone else than the owner tries to send a command to the car, they will not be able to sign their message with the private key of the wallet that owns the NFT. What that means is, even if they successfully send a message to the car (e.g. "Unlock the doors"), the car will not be able to validate the message signature with the public key of the owner (in our example, `0x3a1d5....`).
@@ -163,12 +162,12 @@ If someone else than the owner tries to send a command to the car, they will not
 That's where the nonce comes into play.
 The car will only accept each nonce once. Imagine the owner sent this message:
 ```yaml
-action: OPEN_DOORS
+action: UNLOCK_DOORS
 car_id: 37
 nonce: 1
 ```
 
-The next time the owner wants to open the car, they'll have to use a different nonce (e.g. `nonce: 2`). If the car sees that the nonce was already before, it will reject the command.
+The next time the owner wants to unlock the car, they'll have to use a different nonce (e.g. `nonce: 2`). If the car sees that the nonce was already before, it will reject the command.
 
 So, in our case, if a "hacker" intercepts the message to unlock the car and sends it again later, the car will reject it.
 
@@ -193,7 +192,7 @@ Note: this is not implemented yet, for now you can just transfer tokens but not 
 
 Whenever you buy the token of a car (in our case, `#37`), you immediately get full control over the car - and the previous owner loses the control.
 
-If you understood the previous section, you will understand why it works: with every command it receives, the car checks who the owner is. So whenever the NFT ownership changes, the previous owner will immediately stop being able to issue any command to the car. Indeed, all the message signatures he will produce will now be invalid (see [Non-owner tries to unlock the car](#-Non-owner-tries-to-unlock-the-car)).
+If you understood the previous section, you will understand why it works: with every command it receives, the car checks who the owner is. So whenever the NFT ownership changes, the previous owner will immediately stop being able to issue any command to the car. Indeed, the car will be able to see that the owner changed, so all messages signed by the previous owner get rejected (see [Non-owner tries to unlock the car](#-Non-owner-tries-to-unlock-the-car)).
 
 ### Cost
 
