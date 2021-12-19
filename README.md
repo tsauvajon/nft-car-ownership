@@ -32,11 +32,11 @@ In this repo, you'll find several blocks of software:
 
 ![overview](./docs/overview.png)
 
-- a smart contract, in `./nft`, that allows minting and trading NFTs for the cars,
-- a front-end application, in `./remote-control`, that allows sending commands to a car (e.g. "unlock the doors"),
+- a smart contract, in `./nft`, that allows minting and trading NFTs for the cars; it is written in Solidity,
+- a front-end application, in `./remote-control`, that allows sending commands to a car (e.g. "unlock the doors"); it is written in Vue.js with web3.js,
 - a mock implementation for a car system:
-  - an outside-facing API in `./car/api`,
-  - a front-end aplication that mocks a car being locked or unlocked, in `./car/door-lock-system`. Since I don't own a car I can write programs for, this is one solution I found to have a visual demo.
+  - an outside-facing API in `./car/api`; it is written in Rust,
+  - a front-end aplication that mocks a car being locked or unlocked, in `./car/door-lock-system`. Since I don't own a car I can write programs for, this is one solution I found to have a visual demo; it is written in Rust + WebAssembly, using the Yew.rs framework.
 
 The "cloud" in the diagram represents the fact that I intentionally abstracted the way we send commands from the Remote Control to the Car API. In my implementation, this is a simple HTTP call. In a real-life implementation, we would could for example go through a car manufacturer public API, that would perform some initial checks and then transmit the commands to the car via MQTT.
 
